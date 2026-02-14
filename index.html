@@ -1,225 +1,373 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-  <title>AllInOne Reborn</title>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.11/shaka-player.ui.min.js" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.11/controls.min.css" crossorigin="anonymous">
-
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    html, body {
-      background: #000;
-      height: 100vh;
-      width: 100vw;
-      overflow: hidden;
-      font-family: system-ui, -apple-system, sans-serif;
-    }
-
-    .shaka-video-container {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-    }
-
-    video {
-      width: 100%;
-      height: 100%;
-      background: #000;
-      object-fit: contain;
-    }
-
-    .shaka-spinner-container,
-    .shaka-spinner,
-    .shaka-spinner-svg {
-      display: none !important;
-      visibility: hidden !important;
-      opacity: 0 !important;
-    }
-
-    .error-modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.8);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 10000;
-    }
-
-    .error-modal.hidden { display: none !important; }
-
-    .error-content {
-      background: #222;
-      border-radius: 15px;
-      padding: 25px;
-      max-width: 500px;
-      width: 90%;
-      text-align: center;
-      color: white;
-    }
-
-    .error-content h3 { color: #ff6b6b; margin-bottom: 15px; }
-    .channel-list { display:none; }
-
-    .close-btn {
-      background: #ff4444;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-  </style>
-</head>
-
-<body>
-
-  <div id="errorModal" class="error-modal hidden">
-    <div class="error-content">
-      <h3 id="errorTitle">@allinone_reborn</h3>
-      <p id="errorMessage"></p>
-      <button class="close-btn" onclick="document.getElementById('errorModal').classList.add('hidden')">Close</button>
-    </div>
-  </div>
-
-  <div class="shaka-video-container" data-shaka-player data-shaka-controls>
-    <video autoplay muted playsinline preload="metadata"></video>
-  </div>
-
-  <script>
-document.addEventListener("DOMContentLoaded", async () => {
-
-  const params = new URLSearchParams(window.location.search);
-  const channelId = params.get("play");
-
-  if (!channelId) {
-    showError("No Channel ID", "Please use format: ?play=CHANNEL_ID");
-    return;
-  }
-
-  let channelList = [];
-
-  try {
-    const response = await fetch("https://allinonereborn.xyz/jstrweb2/jstr.php");
-    channelList = await response.json();
-  } catch (error) {
-    showError("Connection Error", "Unable to fetch channel list from server.");
-    return;
-  }
-
-  const channel = channelList.find(c => c.channel_id == channelId);
-
-  if (!channel) {
-    showError("Channel Not Found", "No channel found for ID: " + channelId);
-    return;
-  }
-
-  if (!channel.mpd || channel.mpd.trim() === "") {
-    showError("Stream Error", channel.name + " is not available right now.");
-    return;
-  }
-
-  // Shaka setup
-  shaka.polyfill.installAll();
-
-  if (!shaka.Player.isBrowserSupported()) {
-    showError("Browser Not Supported", "Shaka Player not supported.");
-    return;
-  }
-
-  const video = document.querySelector("video");
-  video.autoplay = true;
-  video.muted = true;
-  
-  const player = new shaka.Player(video);
-  const container = document.querySelector(".shaka-video-container");
-  const ui = new shaka.ui.Overlay(player, container, video);
-
-  ui.configure({
-    controlPanelElements: [
-      "play_pause",
-      "time_and_duration",
-      "mute",
-      "volume",
-      "spacer",
-      "quality",
-      "picture_in_picture",
-      "fullscreen"
-    ],
-    addBigPlayButton: true,
-    seekBarColors: {
-      base: "rgba(255,255,255,.2)",
-      buffered: "rgba(255,255,255,.4)",
-      played: "rgb(255,0,0)"
-    }
-  });
-
-  // DRM Config
-  const drmConfig = channel.drm && Object.keys(channel.drm).length > 0
-    ? { clearKeys: channel.drm }
-    : {};
-
-  player.configure({
-    drm: drmConfig,
-    streaming: {
-      bufferingGoal: 25,
-      rebufferingGoal: 5,
-      bufferBehind: 30,
-      retryParameters: {
-        timeout: 15000,
-        maxAttempts: 3
-      }
-    }
-  });
-
-  // Request filter (Headers & Tokens)
-  player.getNetworkingEngine().registerRequestFilter((type, request) => {
-
-    if (channel.userAgent) {
-      request.headers["User-Agent"] = channel.userAgent;
-    }
-
-    if (channel.referer) {
-       request.headers["Referer"] = channel.referer;
-    }
-
-    if (channel.token) {
-      request.headers["Cookie"] = channel.token;
-
-      if (
-        type === shaka.net.NetworkingEngine.RequestType.MANIFEST ||
-        type === shaka.net.NetworkingEngine.RequestType.SEGMENT
-      ) {
-        if (!request.uris[0].includes(channel.token)) {
-          const separator = request.uris[0].includes("?") ? "&" : "?";
-          request.uris[0] += separator + channel.token;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SPORTIFy Player</title>
+    <!-- Shaka Player -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.11/shaka-player.ui.min.js"></script>
+    <!-- Google Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <style>
+        body { 
+            background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; 
+            margin: 0; padding: 0; width: 100vw; height: 100vh; 
+            overflow: hidden; display: flex; align-items: center; justify-content: center;
         }
-      }
-    }
-  });
 
-  try {
-    console.log("Loading Channel:", channel.name);
-    await player.load(channel.mpd);
-    document.title = channel.name + " | AllInOne Reborn";
-  } catch (error) {
-    console.error("Error code", error.code, "object", error);
-    showError("Stream Error", "Error Code: " + error.code + " - " + error.message);
-  }
+        .video-container { 
+            width: 100%; height: 100%; 
+            background: #000; position: relative; 
+        }
+        
+        video { width: 100%; height: 100%; object-fit: contain; }
 
-  function showError(title, message) {
-    document.getElementById("errorTitle").textContent = title;
-    document.getElementById("errorMessage").innerHTML = message;
-    document.getElementById("errorModal").classList.remove("hidden");
-  }
+        /* Buffering Spinner */
+        .spinner {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 60px; height: 60px; border: 5px solid rgba(255,255,255,0.2);
+            border-top: 5px solid #e50914; border-radius: 50%;
+            animation: spin 0.8s linear infinite; z-index: 25; display: none; pointer-events: none;
+        }
+        @keyframes spin { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }
 
-});
-</script>
+        /* Center Controls (Play, Replay, Forward) */
+        .center-overlay {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            display: flex; align-items: center; gap: 40px; z-index: 10; opacity: 0; transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        .center-btn {
+            background: rgba(0,0,0,0.6); border: none; color: white; border-radius: 50%; padding: 15px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; pointer-events: auto;
+            transition: transform 0.1s;
+        }
+        .center-btn:active { transform: scale(0.9); background: rgba(255,255,255,0.2); }
+        .material-icons.large { font-size: 50px; } 
+        .material-icons.medium { font-size: 35px; }
+
+        /* Bottom Controls Bar */
+        .custom-controls {
+            position: absolute; 
+            bottom: 0; left: 0; width: 100%;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            padding: 10px 20px 20px 20px; box-sizing: border-box;
+            display: flex; flex-direction: column; gap: 10px; 
+            opacity: 0; transition: opacity 0.3s; z-index: 20;
+        }
+
+        /* Seek Bar (Red Line) */
+        .seek-bar-container { width: 100%; height: 5px; background: rgba(255,255,255,0.3); cursor: pointer; position: relative; border-radius: 5px; }
+        .seek-fill { height: 100%; background: #e50914; width: 0%; position: absolute; top: 0; left: 0; border-radius: 5px; }
+        
+        /* Buttons Row */
+        .buttons-row { display: flex; justify-content: space-between; align-items: center; }
+        .left-buttons, .right-buttons { display: flex; gap: 15px; align-items: center; }
+        
+        .icon-btn { background: none; border: none; color: white; cursor: pointer; padding: 5px; display: flex; transition: transform 0.1s; }
+        .icon-btn:hover { transform: scale(1.1); }
+        .material-icons { font-size: 30px; text-shadow: 0 2px 5px rgba(0,0,0,0.8); }
+        
+        .time-text { font-size: 14px; font-weight: bold; margin-left: 5px; cursor: pointer; text-shadow: 0 2px 5px rgba(0,0,0,0.8); min-width: 50px;}
+
+        /* Menus (Quality/Audio) */
+        .popup-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 30; display: none; }
+        .popup-menu {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #1a1a1a; border: 1px solid #444; border-radius: 10px;
+            width: 280px; max-height: 80%; overflow-y: auto; display: none; flex-direction: column; z-index: 35;
+        }
+        .popup-item { padding: 15px 20px; cursor: pointer; font-size: 14px; color: #eee; display: flex; justify-content: space-between; border-bottom: 1px solid #333; transition: background 0.2s; }
+        .popup-item:hover { background: #333; }
+        .popup-item:last-child { border-bottom: none; }
+        .kbps { font-size: 12px; color: #aaa; }
+        .menu-header { padding:15px; font-weight:bold; border-bottom:1px solid #444; display:flex; justify-content:space-between; align-items: center; background: #222; }
+
+        /* Error Message */
+        #error-msg { position: absolute; top: 40%; width: 100%; text-align: center; color: #ff4444; font-size: 18px; display: none; z-index: 5; text-shadow: 0 0 5px black; background: rgba(0,0,0,0.7); padding: 10px; }
+    </style>
+</head>
+<body>
+    <div class="video-container" id="video-container" onclick="toggleControls()">
+        <video id="video" autoplay playsinline></video>
+        <div id="error-msg">Loading...</div>
+        <div class="spinner" id="buffering-spinner"></div>
+
+        <!-- Center Controls -->
+        <div class="center-overlay" id="center-controls">
+            <button class="center-btn" onclick="event.stopPropagation(); skip(-10)"><span class="material-icons medium">replay_10</span></button>
+            <button class="center-btn" onclick="event.stopPropagation(); togglePlay()"><span class="material-icons large" id="center-play-icon">pause</span></button>
+            <button class="center-btn" onclick="event.stopPropagation(); skip(10)"><span class="material-icons medium">forward_10</span></button>
+        </div>
+
+        <!-- Menus -->
+        <div class="popup-overlay" id="popup-overlay" onclick="closeAllMenus()"></div>
+        <div class="popup-menu" id="quality-menu"></div>
+        <div class="popup-menu" id="audio-menu"></div>
+
+        <!-- Bottom Controls -->
+        <div class="custom-controls" id="controls" onclick="event.stopPropagation()">
+            <div class="seek-bar-container" onclick="seekVideo(event)"><div class="seek-fill" id="seek-fill"></div></div>
+            <div class="buttons-row">
+                <div class="left-buttons">
+                    <button class="icon-btn" onclick="togglePlay()"><span class="material-icons" id="play-icon">pause</span></button>
+                    <!-- Volume Icon Only (No Slider) -->
+                    <button class="icon-btn" onclick="toggleMute()"><span class="material-icons" id="vol-icon">volume_up</span></button>
+                    <span class="time-text" id="time-display" onclick="goLive()">0:00</span>
+                </div>
+                <div class="right-buttons">
+                    <button class="icon-btn" onclick="openMenu('quality-menu')"><span class="material-icons">settings</span></button>
+                    <button class="icon-btn" onclick="openMenu('audio-menu')"><span class="material-icons">language</span></button>
+                    <button class="icon-btn" onclick="togglePiP()"><span class="material-icons">picture_in_picture_alt</span></button>
+                    <button class="icon-btn" onclick="toggleFull()"><span class="material-icons">fullscreen</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let player;
+        const video = document.getElementById('video');
+        const spinner = document.getElementById('buffering-spinner');
+        const errorMsg = document.getElementById('error-msg');
+        let hideTimeout;
+
+        // JSON URL
+        const JSON_URL = "https://allinonereborn.xyz/jstrweb2/jstr.php";
+
+        async function init() {
+            shaka.polyfill.installAll();
+            if (!shaka.Player.isBrowserSupported()) {
+                showError("Browser Not Supported");
+                return;
+            }
+
+            // Get Play ID
+            const params = new URLSearchParams(window.location.search);
+            const channelId = params.get("play");
+
+            if (!channelId) {
+                showError("Please use format: ?play=CHANNEL_ID");
+                return;
+            }
+
+            player = new shaka.Player(video);
+            player.addEventListener('error', (e) => console.error(e));
+            player.addEventListener('buffering', (e) => spinner.style.display = e.buffering ? 'block' : 'none');
+
+            // --- FETCH DATA LOGIC ---
+            try {
+                const response = await fetch(JSON_URL);
+                const channelList = await response.json();
+                const channel = channelList.find(c => c.channel_id == channelId);
+
+                if (!channel) {
+                    showError("Channel Not Found: " + channelId);
+                    return;
+                }
+                
+                // Set Title
+                document.title = channel.name || "Live Stream";
+
+                // --- HEADERS & TOKENS ---
+                player.getNetworkingEngine().registerRequestFilter((type, request) => {
+                    if (channel.userAgent) request.headers["User-Agent"] = channel.userAgent;
+                    if (channel.referer) request.headers["Referer"] = channel.referer;
+                    if (channel.token) {
+                        request.headers["Cookie"] = channel.token;
+                        if (type === shaka.net.NetworkingEngine.RequestType.MANIFEST || type === shaka.net.NetworkingEngine.RequestType.SEGMENT) {
+                            if (!request.uris[0].includes(channel.token)) {
+                                const separator = request.uris[0].includes("?") ? "&" : "?";
+                                request.uris[0] += separator + channel.token;
+                            }
+                        }
+                    }
+                });
+
+                // --- DRM CONFIG ---
+                const drmConfig = channel.drm && Object.keys(channel.drm).length > 0 ? { clearKeys: channel.drm } : {};
+
+                // --- PLAYER CONFIG (Combined Logic) ---
+                player.configure({
+                    drm: drmConfig,
+                    streaming: { 
+                        bufferingGoal: 15,
+                        rebufferingGoal: 5,
+                        bufferBehind: 30,
+                        retryParameters: { timeout: 10000, maxAttempts: 5 }
+                    },
+                    abr: { enabled: true, defaultBandwidthEstimate: 1000000 }
+                });
+
+                // Load Stream
+                await player.load(channel.mpd);
+                
+                // Autoplay Logic
+                try {
+                    await video.play();
+                } catch(e) {
+                    video.muted = true;
+                    await video.play();
+                    toggleMuteUI(); // Update Icon
+                }
+
+                startTimer();
+                updateMenus();
+                showControls();
+
+            } catch (error) {
+                console.error(error);
+                showError("Stream Error: " + error.message);
+            }
+        }
+
+        // --- UI FUNCTIONS (Original Design Logic) ---
+
+        function showError(msg) {
+            errorMsg.style.display = 'block';
+            errorMsg.innerText = msg;
+            spinner.style.display = 'none';
+        }
+
+        function openMenu(id) { 
+            closeAllMenus(); 
+            document.getElementById('popup-overlay').style.display = 'block'; 
+            document.getElementById(id).style.display = 'flex'; 
+        }
+
+        function closeAllMenus() { 
+            document.getElementById('popup-overlay').style.display = 'none'; 
+            document.querySelectorAll('.popup-menu').forEach(m => m.style.display = 'none'); 
+        }
+        
+        function updateMenus() {
+            // Quality Menu
+            const q = document.getElementById('quality-menu');
+            q.innerHTML = `<div class="menu-header">Quality <span onclick="closeAllMenus()" style="cursor:pointer">✕</span></div><div class="popup-item" onclick="setQ('auto')">Auto <span class="kbps">Default</span></div>`;
+            const tracks = player.getVariantTracks();
+            const seen = new Set();
+            tracks.sort((a,b) => b.height - a.height).forEach(t => {
+                if(t.height && !seen.has(t.height)) {
+                    seen.add(t.height);
+                    q.innerHTML += `<div class="popup-item" onclick="setQ(${t.height})">${t.height}p <span class="kbps">${Math.round(t.bandwidth/1000)} kbps</span></div>`;
+                }
+            });
+
+            // Audio Menu
+            const a = document.getElementById('audio-menu');
+            a.innerHTML = `<div class="menu-header">Audio <span onclick="closeAllMenus()" style="cursor:pointer">✕</span></div>`;
+            const langName = new Intl.DisplayNames(['en'], { type: 'language' });
+            player.getAudioLanguages().forEach(l => {
+                let label = l;
+                try { label = langName.of(l); } catch(e) {}
+                a.innerHTML += `<div class="popup-item" onclick="setA('${l}')">${label}</div>`;
+            });
+        }
+
+        function setQ(h) { 
+            if(h==='auto') player.configure({abr:{enabled:true}});
+            else { player.configure({abr:{enabled:false}}); player.selectVariantTrack(player.getVariantTracks().find(x=>x.height==h),true); }
+            closeAllMenus(); 
+        }
+        function setA(l) { player.selectAudioLanguage(l); closeAllMenus(); }
+
+        function startTimer() {
+            video.ontimeupdate = () => {
+                if(player.isLive()) {
+                    const lat = player.seekRange().end - video.currentTime;
+                    // Live Edge Logic
+                    if(lat < 10) {
+                        document.getElementById('time-display').innerHTML = '<span style="color:#e50914">●</span> LIVE';
+                        document.getElementById('seek-fill').style.width = '100%';
+                    } else {
+                        document.getElementById('time-display').innerText = "-" + formatTime(lat);
+                        document.getElementById('time-display').style.color = "#ccc";
+                        // Calculate percentage based on seek range
+                        const range = player.seekRange();
+                        const percent = ((video.currentTime - range.start) / (range.end - range.start)) * 100;
+                        document.getElementById('seek-fill').style.width = percent + '%';
+                    }
+                } else {
+                    document.getElementById('seek-fill').style.width = ((video.currentTime/video.duration)*100) + '%';
+                    document.getElementById('time-display').innerText = formatTime(video.currentTime) + " / " + formatTime(video.duration);
+                }
+            };
+        }
+
+        function formatTime(s) { 
+            const m = Math.floor(s / 60), sec = Math.floor(s % 60); 
+            return `${m}:${sec < 10 ? '0' : ''}${sec}`; 
+        }
+
+        function skip(v) { video.currentTime += v; showControls(); }
+        function goLive() { if(player.isLive()) video.currentTime = player.seekRange().end - 1; }
+        
+        function seekVideo(e) { 
+            const r = e.currentTarget.getBoundingClientRect();
+            const p = (e.clientX - r.left) / r.width; 
+            if (player.isLive()) {
+                const range = player.seekRange();
+                video.currentTime = range.start + ((range.end - range.start) * p);
+            } else {
+                video.currentTime = p * video.duration; 
+            }
+        }
+        
+        function togglePlay() { 
+            video.paused ? video.play() : video.pause(); 
+            updIcon(); 
+            showControls(); 
+        }
+        
+        function updIcon() { 
+            const i = video.paused ? 'play_arrow' : 'pause';
+            document.getElementById('play-icon').innerText = i; 
+            document.getElementById('center-play-icon').innerText = i; 
+        }
+        
+        function toggleMute() { 
+            video.muted = !video.muted; 
+            toggleMuteUI();
+        }
+
+        function toggleMuteUI() {
+            document.getElementById('vol-icon').innerText = video.muted ? 'volume_off' : 'volume_up';
+        }
+
+        function toggleFull() { 
+            if (!document.fullscreenElement) {
+                document.getElementById('video-container').requestFullscreen().catch(err => console.log(err));
+                if (screen.orientation && screen.orientation.lock) screen.orientation.lock("landscape").catch(() => {});
+            } else {
+                document.exitFullscreen();
+            }
+        }
+        function togglePiP() { document.pictureInPictureElement ? document.exitPictureInPicture() : video.requestPictureInPicture(); }
+        
+        function toggleControls() { document.getElementById('controls').style.opacity === '1' ? hideControls() : showControls(); }
+        
+        function showControls() { 
+            document.getElementById('controls').style.opacity = '1'; 
+            document.getElementById('center-controls').style.opacity = '1'; 
+            document.getElementById('video-container').style.cursor = 'default'; 
+            clearTimeout(hideTimeout); 
+            if(!video.paused) hideTimeout = setTimeout(hideControls, 3000); 
+        }
+        
+        function hideControls() { 
+            if(!video.paused && document.getElementById('popup-overlay').style.display !== 'block') { 
+                document.getElementById('controls').style.opacity = '0'; 
+                document.getElementById('center-controls').style.opacity = '0'; 
+                document.getElementById('video-container').style.cursor = 'none'; 
+            } 
+        }
+
+        // Setup Events
+        video.addEventListener('play', updIcon);
+        video.addEventListener('pause', updIcon);
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
 </body>
 </html>
