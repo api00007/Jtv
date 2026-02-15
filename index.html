@@ -134,7 +134,7 @@
                 if (channelId) {
                     try {
                         // Fetch JSON data
-                        const response = await fetch("https://allinonereborn.xyz/jstrweb2/jstr.php");
+                        const response = await fetch("https://cdn.jsdelivr.net/gh/sptvhelpdesk-ship-it/jstar-aoi@main/channels.json");
                         const channelList = await response.json();
                         const channel = channelList.find(c => c.channel_id == channelId);
 
