@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>S-PTV Direct</title>
+    <title>S-PTV Direct Player</title>
     <!-- Shaka Player Version 4.7.11 (Stable) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.11/shaka-player.ui.min.js"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     
     <style>
-        /* আপনার দেওয়া অরিজিনাল CSS */
+        /* আপনার অরিজিনাল কাস্টম CSS ডিজাইন অক্ষত রাখা হয়েছে */
         body { 
             background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; 
             margin: 0; padding: 0; width: 100vw; height: 100vh; 
@@ -80,6 +80,7 @@
         <div id="error-msg">Loading...</div>
         <div class="spinner" id="buffering-spinner"></div>
 
+        <!-- Custom UI Overlay -->
         <div class="center-overlay" id="center-controls">
             <button class="center-btn" onclick="event.stopPropagation(); skip(-10)"><span class="material-icons medium">replay_10</span></button>
             <button class="center-btn" onclick="event.stopPropagation(); togglePlay()"><span class="material-icons large" id="center-play-icon">pause</span></button>
@@ -95,7 +96,6 @@
             <div class="buttons-row">
                 <div class="left-buttons">
                     <button class="icon-btn" onclick="togglePlay()"><span class="material-icons" id="play-icon">pause</span></button>
-                    <!-- Volume Button Only (No Seekbar) -->
                     <button class="icon-btn" onclick="toggleMute()"><span class="material-icons" id="vol-icon">volume_up</span></button>
                     <span class="time-text" id="time-display" onclick="goLive()">0:00</span>
                 </div>
@@ -110,10 +110,6 @@
     </div>
 
     <script>
-        // ==========================================
-        //  NEW LOGIC INTEGRATION
-        // ==========================================
-
         let player;
         const video = document.getElementById('video');
         const spinner = document.getElementById('buffering-spinner');
@@ -127,106 +123,99 @@
                 player.addEventListener('error', (e) => console.error(e));
                 player.addEventListener('buffering', (e) => spinner.style.display = e.buffering ? 'block' : 'none');
                 
-                // --- NEW JSON FETCH LOGIC START ---
+                // URL থেকে ?id= নেওয়া হচ্ছে
                 const params = new URLSearchParams(window.location.search);
-                const channelId = params.get('play');
+                const channelId = params.get('id');
 
                 if (channelId) {
                     try {
-                        // Fetch JSON data
+                        // আপনার দেওয়া JSON সোর্স
                         const response = await fetch("https://cdn.jsdelivr.net/gh/sptvhelpdesk-ship-it/jstar-aoi@main/channels.json");
                         const channelList = await response.json();
                         const channel = channelList.find(c => c.channel_id == channelId);
 
                         if (channel) {
                             document.title = channel.name || "Live TV";
-                            
-                            // Setup Headers (Token, UA, Referer)
+
+                            // ============================================================
+                            // *** CORE LOGIC START (ডিকোড করা স্ক্রিপ্ট থেকে নেওয়া) ***
+                            // ============================================================
                             player.getNetworkingEngine().registerRequestFilter((type, request) => {
-                                if (channel.userAgent) request.headers["User-Agent"] = channel.userAgent;
-                                if (channel.referer) request.headers["Referer"] = channel.referer;
+                                // ১. User-Agent সেটআপ (না থাকলে ডিফল্ট JioTV/ExoPlayer দিবে)
+                                request.headers['User-Agent'] = channel.userAgent || 'plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.';
+                                
+                                // ২. Referer সেটআপ
+                                request.headers['Referer'] = channel.referer || 'https://www.jiotv.com/';
+
+                                // ৩. টোকেন URL-এর শেষে যুক্ত করা
                                 if (channel.token) {
-                                    request.headers["Cookie"] = channel.token;
-                                    if (type === shaka.net.NetworkingEngine.RequestType.MANIFEST || type === shaka.net.NetworkingEngine.RequestType.SEGMENT) {
-                                        if (!request.uris[0].includes(channel.token)) {
-                                            const separator = request.uris[0].includes("?") ? "&" : "?";
-                                            request.uris[0] += separator + channel.token;
-                                        }
+                                    request.headers['Cookie'] = channel.token;
+                                    
+                                    if ((type === shaka.net.NetworkingEngine.RequestType.MANIFEST || 
+                                         type === shaka.net.NetworkingEngine.RequestType.SEGMENT) && 
+                                         request.uris[0] && !request.uris[0].includes('__hdnea__=')) {
+                                        
+                                        const separator = request.uris[0].includes('?') ? '&' : '?';
+                                        request.uris[0] += separator + channel.token;
                                     }
                                 }
                             });
 
-                            // DRM Setup
-                            let drmConfig = {};
-                            if (channel.drm && Object.keys(channel.drm).length > 0) {
-                                drmConfig = { clearKeys: channel.drm };
+                            // DRM সেটআপ
+                            const drmConfig = (channel.drm && Object.keys(channel.drm).length > 0) ? { 'clearKeys': channel.drm } : {};
+
+                            // অ্যাডভান্সড স্ট্রিমিং কনফিগারেশন
+                            player.configure({
+                                'drm': drmConfig,
+                                'streaming': {
+                                    'lowLatencyMode': true,
+                                    'bufferingGoal': 25,
+                                    'rebufferingGoal': 5,
+                                    'bufferBehind': 30,
+                                    'retryParameters': { 'timeout': 15000, 'maxAttempts': 3 }
+                                },
+                                'abr': { 'enabled': true }
+                            });
+                            // ============================================================
+                            // *** CORE LOGIC END ***
+                            // ============================================================
+
+                            try {
+                                // প্লেয়ার লোড করা হচ্ছে
+                                await player.load(channel.mpd);
+                                
+                                var playPromise = video.play();
+                                if (playPromise !== undefined) {
+                                    playPromise.catch(() => {
+                                        video.muted = true;
+                                        video.play();
+                                        toggleMuteUI();
+                                    });
+                                }
+
+                                if (player.isLive()) video.currentTime = player.seekRange().end - 1;
+                                startTimer();
+                                updateMenus();
+                                showControls();
+
+                            } catch (e) {
+                                console.error(e);
+                                showError("Stream Offline / Error");
                             }
 
-                            // Load Player
-                            loadPlayer(channel.mpd, drmConfig);
-
                         } else {
-                            showError("Channel ID Not Found");
+                            showError("Channel ID Not Found in JSON");
                         }
                     } catch (e) {
                         console.error(e);
                         showError("Failed to fetch channel list");
                     }
                 } else {
-                    showError("Error: Use ?play=CHANNEL_ID");
+                    showError("Error: Use ?id=CHANNEL_ID");
                 }
-                // --- NEW JSON FETCH LOGIC END ---
-
-                // Orientation Lock (Optional)
-                document.addEventListener("fullscreenchange", function() {
-                    if (document.fullscreenElement) {
-                        if (screen.orientation && screen.orientation.lock) {
-                            screen.orientation.lock("landscape").catch(function(error) {});
-                        }
-                    }
-                });
 
             } else {
                 showError("Browser Not Supported");
-            }
-        }
-
-        async function loadPlayer(url, drmConfig) {
-            errorMsg.style.display = 'none';
-            
-            const config = {
-                streaming: { 
-                    bufferingGoal: 5,
-                    rebufferingGoal: 2,
-                    bufferBehind: 10,
-                    lowLatencyMode: true,
-                    retryParameters: { timeout: 10000, maxAttempts: 5 }
-                },
-                abr: { enabled: true, defaultBandwidthEstimate: 500000 },
-                drm: drmConfig
-            };
-            
-            player.configure(config);
-            try {
-                await player.load(url);
-                
-                // Play Logic
-                var playPromise = video.play();
-                if (playPromise !== undefined) {
-                    playPromise.then(_ => {}).catch(error => {
-                        video.muted = true;
-                        video.play();
-                        toggleMuteUI();
-                    });
-                }
-
-                if (player.isLive()) video.currentTime = player.seekRange().end - 1;
-                startTimer();
-                updateMenus();
-                showControls();
-            } catch (e) { 
-                console.error(e);
-                showError("Stream Offline / Error"); 
             }
         }
 
@@ -236,6 +225,9 @@
             spinner.style.display = 'none';
         }
 
+        /* -------------------------------------------------------------
+           আপনার দেওয়া কাস্টম UI-এর সমস্ত ফাংশন (কোনো কিছু চেঞ্জ করা হয়নি)
+           ------------------------------------------------------------- */
         function openMenu(id) { closeAllMenus(); document.getElementById('popup-overlay').style.display = 'block'; document.getElementById(id).style.display = 'flex'; }
         function closeAllMenus() { document.getElementById('popup-overlay').style.display = 'none'; document.querySelectorAll('.popup-menu').forEach(m => m.style.display = 'none'); }
         
@@ -253,9 +245,7 @@
 
             const a = document.getElementById('audio-menu');
             a.innerHTML = `<div style="padding:12px;font-weight:bold;border-bottom:1px solid #333;display:flex;justify-content:space-between">Audio <span onclick="closeAllMenus()" style="cursor:pointer">×</span></div>`;
-            
             const langName = new Intl.DisplayNames(['en'], { type: 'language' });
-
             player.getAudioLanguages().forEach(l => {
                 let label;
                 try { label = langName.of(l); } catch(e) { label = l.toUpperCase(); }
