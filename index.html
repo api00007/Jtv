@@ -9,7 +9,6 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     
     <style>
-        /* আপনার অরিজিনাল কাস্টম CSS ডিজাইন অক্ষত রাখা হয়েছে */
         body { 
             background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; 
             margin: 0; padding: 0; width: 100vw; height: 100vh; 
@@ -80,7 +79,6 @@
         <div id="error-msg">Loading...</div>
         <div class="spinner" id="buffering-spinner"></div>
 
-        <!-- Custom UI Overlay -->
         <div class="center-overlay" id="center-controls">
             <button class="center-btn" onclick="event.stopPropagation(); skip(-10)"><span class="material-icons medium">replay_10</span></button>
             <button class="center-btn" onclick="event.stopPropagation(); togglePlay()"><span class="material-icons large" id="center-play-icon">pause</span></button>
@@ -123,13 +121,11 @@
                 player.addEventListener('error', (e) => console.error(e));
                 player.addEventListener('buffering', (e) => spinner.style.display = e.buffering ? 'block' : 'none');
                 
-                // URL থেকে ?play= নেওয়া হচ্ছে (আপনার নির্দেশ অনুযায়ী)
                 const params = new URLSearchParams(window.location.search);
                 const channelId = params.get('play');
 
                 if (channelId) {
                     try {
-                        // আপনার দেওয়া JSON সোর্স
                         const response = await fetch("https://raw.githubusercontent.com/sptvhelpdesk-ship-it/jstar-aoi/refs/heads/main/channels.json");
                         const channelList = await response.json();
                         const channel = channelList.find(c => c.channel_id == channelId);
@@ -137,53 +133,35 @@
                         if (channel) {
                             document.title = channel.name || "Live TV";
 
-                            // ============================================================
-                            // *** CORE LOGIC START (ডিকোড করা স্ক্রিপ্ট থেকে নেওয়া) ***
-                            // ============================================================
+                            // ================= FIX LOGIC START =================
                             player.getNetworkingEngine().registerRequestFilter((type, request) => {
-                                // ১. User-Agent সেটআপ (না থাকলে ডিফল্ট JioTV/ExoPlayer দিবে)
+                                // ১. Headers Setup
                                 request.headers['User-Agent'] = channel.userAgent || 'plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.';
-                                
-                                // ২. Referer সেটআপ
                                 request.headers['Referer'] = channel.referer || 'https://www.jiotv.com/';
 
-                                // ৩. টোকেন URL-এর শেষে যুক্ত করা
-                                if (channel.token) {
-                                    request.headers['Cookie'] = channel.token;
-                                    
-                                    if ((type === shaka.net.NetworkingEngine.RequestType.MANIFEST || 
-                                         type === shaka.net.NetworkingEngine.RequestType.SEGMENT) && 
-                                         request.uris[0] && !request.uris[0].includes('__hdnea__=')) {
-                                        
-                                        const separator = request.uris[0].includes('?') ? '&' : '?';
+                                // ২. Token Logic (V1 এর মতো ফিক্স করা হয়েছে)
+                                if (channel.token && (type === shaka.net.NetworkingEngine.RequestType.MANIFEST || type === shaka.net.NetworkingEngine.RequestType.SEGMENT)) {
+                                    const separator = request.uris[0].includes('?') ? '&' : '?';
+                                    if (!request.uris[0].includes('__hdnea__')) {
                                         request.uris[0] += separator + channel.token;
                                     }
                                 }
                             });
+                            // ================= FIX LOGIC END ===================
 
-                            // DRM সেটআপ
                             const drmConfig = (channel.drm && Object.keys(channel.drm).length > 0) ? { 'clearKeys': channel.drm } : {};
 
-                            // অ্যাডভান্সড স্ট্রিমিং কনফিগারেশন
                             player.configure({
                                 'drm': drmConfig,
                                 'streaming': {
                                     'lowLatencyMode': true,
-                                    'bufferingGoal': 25,
-                                    'rebufferingGoal': 5,
-                                    'bufferBehind': 30,
                                     'retryParameters': { 'timeout': 15000, 'maxAttempts': 3 }
                                 },
                                 'abr': { 'enabled': true }
                             });
-                            // ============================================================
-                            // *** CORE LOGIC END ***
-                            // ============================================================
 
                             try {
-                                // প্লেয়ার লোড করা হচ্ছে
                                 await player.load(channel.mpd);
-                                
                                 var playPromise = video.play();
                                 if (playPromise !== undefined) {
                                     playPromise.catch(() => {
@@ -199,22 +177,18 @@
                                 showControls();
 
                             } catch (e) {
-                                console.error(e);
                                 showError("Stream Offline / Error");
                             }
 
                         } else {
-                            showError("Channel ID Not Found in JSON");
+                            showError("Channel ID Not Found");
                         }
                     } catch (e) {
-                        console.error(e);
                         showError("Failed to fetch channel list");
                     }
                 } else {
-                    // এরর মেসেজটাও আপডেট করা হয়েছে
                     showError("Error: Use ?play=CHANNEL_ID");
                 }
-
             } else {
                 showError("Browser Not Supported");
             }
@@ -226,9 +200,6 @@
             spinner.style.display = 'none';
         }
 
-        /* -------------------------------------------------------------
-           আপনার দেওয়া কাস্টম UI-এর সমস্ত ফাংশন (কোনো কিছু চেঞ্জ করা হয়নি)
-           ------------------------------------------------------------- */
         function openMenu(id) { closeAllMenus(); document.getElementById('popup-overlay').style.display = 'block'; document.getElementById(id).style.display = 'flex'; }
         function closeAllMenus() { document.getElementById('popup-overlay').style.display = 'none'; document.querySelectorAll('.popup-menu').forEach(m => m.style.display = 'none'); }
         
