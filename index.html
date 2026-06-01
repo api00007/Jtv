@@ -1,264 +1,671 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>S-PTV Direct Player</title>
-    <!-- Shaka Player Version 4.7.11 (Stable) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.11/shaka-player.ui.min.js"></script>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <meta charset="UTF-8">
+  <!-- ZOOM FIX: Added maximum-scale and user-scalable=no to prevent unwanted zooming -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  
+  <!-- IMAGE FIX: Prevent domain blocking and load clear original images -->
+  <meta name="referrer" content="no-referrer">
+  
+  <title>ATV SPORTS - Live Sports Streaming</title>
+  
+  <!-- LOGO CONFIGURATION (Favicon & App Icon) -->
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="apple-touch-icon" href="logo.png">
+  
+  <!-- SEO OPTIMIZATION -->
+  <meta name="description" content="Watch live sports streaming including Cricket, Football, Premier League, IPL, and major leagues worldwide on ATV SPORTS for free.">
+  <meta name="keywords" content="live sports, football streaming, cricket live, ipl, isl, premier league, la liga, champions league, atv sports, free sports tv, live match">
+  <meta name="author" content="ATV SPORTS">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#000000">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://sportify-tv.github.io/">
+  <meta property="og:title" content="ATV SPORTS - Live Sports Streaming">
+  <meta property="og:description" content="Watch live sports streaming including Cricket, Football, and major leagues worldwide on ATV SPORTS.">
+  <meta property="og:image" content="logo.png">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:title" content="ATV SPORTS - Live Sports Streaming">
+  <meta property="twitter:description" content="Watch live sports streaming including Cricket, Football, and major leagues worldwide on ATV SPORTS.">
+  
+  <link rel="canonical" href="https://sportify-tv.github.io/" />
+  
+  <!-- 1. Google Analytics -->
+  <script async src='https://www.googletagmanager.com/gtag/js?id=G-QGT6JCVYQS'></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-QGT6JCV;QS');
+  </script>
+
+  <!-- 2. Security -->
+  <script src='https://cdn.jsdelivr.net/npm/disable-devtool' defer></script>
+
+  <!-- FONTS -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css' rel='stylesheet' media="print" onload="this.media='all'"/>
+  <noscript><link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css' rel='stylesheet'/></noscript>
+  <link href='https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&amp;display=swap' rel='stylesheet' media="print" onload="this.media='all'"/>
+  <link href='https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600&amp;display=swap' rel='stylesheet' media="print" onload="this.media='all'"/>
+  <link href='https://fonts.googleapis.com/css2?family=Permanent+Marker&amp;display=swap' rel='stylesheet' media="print" onload="this.media='all'"/>
+
+  <style>
+    :root {
+      /* THEME VARIABLES */
+      --bg-body: #000000;
+      --header-bg: #000000;
+      --card-bg: #111111;
+      --primary: #0a1f44;
+      --border-green: #39ff14;
+      --text-main: #ffffff;
+      --text-sub: #bbbbbb;
+      --border-color: #333333;
+      --social-bg: #ffffff;
+      --social-text: #333333;
+      --fb-color: #1877F2;
+    }
     
-    <style>
-        body { 
-            background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; 
-            margin: 0; padding: 0; width: 100vw; height: 100vh; 
-            overflow: hidden; display: flex; align-items: center; justify-content: center;
-        }
+    body.light-mode {
+      --bg-body: #f4f6f8;
+      --header-bg: #ffffff;
+      --card-bg: #ffffff;
+      --primary: #0056b3;
+      --border-green: #00c853;
+      --text-main: #333333;
+      --text-sub: #666666;
+      --border-color: #e0e0e0;
+      --social-bg: #f0f0f0;
+      --social-text: #000000;
+    }
 
-        .video-container { 
-            width: 100%; max-width: 1000px; aspect-ratio: 16/9; 
-            background: #000; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.5);
-        }
-        
-        video { width: 100%; height: 100%; object-fit: contain; }
+    * { box-sizing: border-box; margin: 0; padding: 0; outline: none; -webkit-tap-highlight-color: transparent; }
+    
+    body { 
+      font-family: 'Roboto', sans-serif; 
+      background: var(--bg-body); 
+      color: var(--text-main); 
+      margin: 0; 
+      overflow-x: hidden; 
+      transition: background 0.3s, color 0.3s; 
+      padding-bottom: 85px; /* SPACE FOR BOTTOM NAV */
+      user-select: none;
+    }
+    
+    a { text-decoration: none; color: inherit; }
+    ul { list-style: none; padding: 0; margin: 0; }
+    .widget h2, .widget .title { display: none !important; }
 
-        .spinner {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 60px; height: 60px; border: 5px solid rgba(255,255,255,0.2);
-            border-top: 5px solid #e50914; border-radius: 50%;
-            animation: spin 0.8s linear infinite; z-index: 25; display: none; pointer-events: none;
-        }
-        @keyframes spin { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+    /* ATV SPORTS COLOR LOGO */
+    .logo-main { 
+        font-family: 'Permanent Marker', cursive; 
+        font-size: 45px !important; 
+        color: var(--text-main); 
+        display: flex;
+        align-items: center;
+        text-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+    }
+    .atv-a { color: #ff0000; }
+    .atv-t { color: #1877F2; }
+    .atv-v { color: #39ff14; }
+    .logo-sports { font-size: 24px; margin-left: 8px; color: #fff; font-weight: 900; letter-spacing: 1px; }
 
-        .center-overlay {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            display: flex; align-items: center; gap: 40px; z-index: 10; opacity: 0; transition: opacity 0.3s;
-            pointer-events: none;
-        }
-        .center-btn {
-            background: rgba(0,0,0,0.6); border: none; color: white; border-radius: 50%; padding: 12px;
-            cursor: pointer; display: flex; align-items: center; justify-content: center; pointer-events: auto;
-        }
-        .center-btn:active { transform: scale(0.9); background: rgba(255,255,255,0.2); }
-        .material-icons.large { font-size: 45px; } .material-icons.medium { font-size: 30px; }
+    /* PROMO BANNER (BEHIND LOGO) */
+    .promo-scrolling-box {
+        margin: 10px 15px;
+        background: #0a1f44;
+        border: 1.5px solid #1877F2;
+        border-radius: 10px;
+        padding: 12px;
+        overflow: hidden;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        position: relative;
+    }
+    .promo-scrolling-box marquee {
+        color: #39ff14;
+        font-weight: 700;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
 
-        .custom-controls {
-            position: absolute; 
-            bottom: 0; left: 0; width: 100%;
-            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-            padding: 10px 15px; box-sizing: border-box;
-            display: flex; flex-direction: column; gap: 5px; 
-            opacity: 0; transition: opacity 0.3s; z-index: 20;
-        }
+    /* SIDEBAR (SCREENSHOT DESIGN) */
+    .sidebar-panel { 
+      position: fixed; top: 0; left: -320px; width: 300px; height: 100%; 
+      background: #1a1a1a; z-index: 1000; transition: left 0.3s ease; 
+      display: flex; flex-direction: column; color: #fff; overflow-y: auto; 
+    }
+    .sidebar-panel.active { left: 0; box-shadow: 5px 0 15px rgba(0,0,0,0.8); }
+    .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 900; display: none; backdrop-filter: blur(2px); }
+    .sidebar-overlay.active { display: block; }
+    
+    .sb-atv-header { padding: 40px 20px 10px 20px; text-align: center; }
+    .sb-atv-title { color: #ff4d4d; font-size: 32px; font-weight: 900; margin-bottom: 8px; }
+    .sb-atv-desc { color: #ccc; font-size: 13.5px; line-height: 1.5; padding: 0 5px; }
+    .sb-red-line { width: 65px; height: 3px; background: #ff4d4d; margin: 15px auto; }
+    
+    .sb-atv-list li a { 
+      display: flex; align-items: center; gap: 15px; padding: 15px 25px; 
+      font-weight: 500; font-size: 15px; color: #eee; border-bottom: 1px solid #222;
+    }
+    .sb-atv-list li a i { width: 22px; font-size: 18px; color: #ff4d4d; text-align: center; }
 
-        .seek-bar-container { width: 100%; height: 5px; background: rgba(255,255,255,0.3); cursor: pointer; position: relative; }
-        .seek-fill { height: 100%; background: #e50914; width: 0%; position: absolute; top: 0; left: 0; }
-        
-        .buttons-row { display: flex; justify-content: space-between; align-items: center; }
-        .left-buttons, .right-buttons { display: flex; gap: 10px; align-items: center; }
-        
-        .icon-btn { background: none; border: none; color: white; cursor: pointer; padding: 5px; display: flex; }
-        .material-icons { font-size: 28px; text-shadow: 0 0 5px rgba(0,0,0,0.8); }
-        .time-text { font-size: 13px; font-weight: bold; margin-left: 5px; cursor: pointer; text-shadow: 0 0 5px rgba(0,0,0,0.8); }
+    /* FIXED BOTTOM NAVIGATION */
+    .fixed-bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        max-width: 600px;
+        background: #111;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        padding: 12px 0;
+        border-top: 2px solid #333;
+        z-index: 1000;
+        box-shadow: 0 -5px 15px rgba(0,0,0,0.5);
+    }
+    .bn-item { color: #fff; text-align: center; flex: 1; font-size: 12px; font-weight: 800; text-transform: uppercase; cursor: pointer; }
+    .bn-item i { display: block; font-size: 20px; margin-bottom: 4px; color: #ff4d4d; }
 
-        .popup-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 30; display: none; }
-        .popup-menu {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: #1a1a1a; border: 1px solid #444; border-radius: 10px;
-            width: 260px; max-height: 80%; overflow-y: auto; display: none; flex-direction: column; z-index: 35;
-        }
-        .popup-item { padding: 12px 15px; cursor: pointer; font-size: 13px; color: #ccc; display: flex; justify-content: space-between; border-bottom: 1px solid #222; }
-        .kbps { font-size: 11px; color: #777; }
-        
-        #error-msg { position: absolute; top: 40%; width: 100%; text-align: center; color: #ff4444; font-size: 16px; display: none; z-index: 5; text-shadow: 0 0 5px black; }
-    </style>
+    /* HEADER */
+    .main-wrapper { max-width: 600px; margin: 0 auto; min-height: 100vh; position: relative; display: flex; flex-direction: column; }
+    .header-container { 
+      background: var(--header-bg); padding: 10px 15px; display: flex; 
+      align-items: center; justify-content: space-between; position: sticky; 
+      top: 0; z-index: 100; border-bottom: 1px solid var(--border-color); 
+    }
+    .icon-box { 
+      width: 40px; height: 40px; background: var(--primary); border-radius: 5px; 
+      display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px; cursor: pointer; 
+    }
+
+    /* FILTERS */
+    .filter-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 10px 15px 20px 15px; }
+    .f-btn { 
+      background: var(--card-bg); color: var(--text-main); border: 1px solid var(--border-color); 
+      padding: 10px 0; border-radius: 5px; font-weight: 600; font-size: 13px; cursor: pointer;
+    }
+    .f-btn.active { background: #1877F2; color: #fff; border-color: #1877F2; }
+
+    /* MATCH CARD - COMPACT HARD CLICK (PREMIUM ANIMATION) */
+    #match-list-container { display: flex; flex-direction: column; gap: 15px; padding-bottom: 40px; padding: 0 15px; }
+    .m-card { 
+      background: var(--card-bg); color: var(--text-main); border-radius: 12px; 
+      padding: 15px 12px; border: 1px solid var(--border-color); position: relative; 
+      cursor: pointer; display: flex; flex-direction: column; min-height: 150px; 
+      transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      transform: none; 
+    }
+    .m-card:active { background: rgba(255,255,255,0.05); transform: scale(0.96); }
+    .m-card.live { border: 1px solid var(--border-green); }
+    
+    .mc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; width: 100%; overflow: hidden; position: relative; }
+    .mc-header-left { display: flex; align-items: center; flex: 1; overflow: hidden; position: relative; height: 25px; }
+    
+    /* SCROLL BEHIND LOGO FIX */
+    .mc-league-logo { 
+        width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; 
+        z-index: 10; position: relative; background: var(--card-bg); padding-right: 5px;
+    }
+    .mc-league-text { font-size: 12px; font-weight: 700; color: var(--text-main); text-transform: uppercase; white-space: nowrap; display: inline-block; z-index: 1; }
+    .scroll-active { animation: rewindScroll 12s linear infinite; }
+    @keyframes rewindScroll { 0% { transform: translateX(0); } 80% { transform: translateX(-100%); } 100% { transform: translateX(0); } }
+    
+    /* 12H TIME TOP RIGHT */
+    .mc-timer-top { font-size: 11px; font-weight: 700; color: var(--text-sub); background: var(--card-bg); z-index: 11; padding-left: 5px; white-space: nowrap; }
+    
+    .mc-teams { display: flex; align-items: center; justify-content: space-between; flex-grow: 1; padding-top: 5px; }
+    .mc-team { width: 35%; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; }
+    .mc-logo { width: 60px; height: 60px; object-fit: contain; }
+    .mc-name { font-size: 13px; font-weight: 600; color: var(--text-main); line-height: 1.2; }
+    
+    /* DYNAMIC VS SECTION (FIXED OVERLAP) */
+    .mc-status-center { width: 30%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 70px; }
+    .vs-txt-main { font-size: 24px; font-weight: 900; color: #444; font-style: italic; line-height: 1; margin-bottom: 2px; }
+    .st-label { font-size: 10px; font-weight: 800; text-transform: uppercase; color: #888; display: block; line-height: 1; }
+    .st-time { font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 700; color: #1877F2; background: rgba(24, 119, 242, 0.1); padding: 2px 8px; border-radius: 4px; margin-top: 2px; }
+    
+    .live-dot-blob { width: 10px; height: 10px; background: red; border-radius: 50%; box-shadow: 0 0 8px red; animation: pulseRed 1s infinite; }
+    .live-txt-red { color: red; font-size: 12px; font-weight: 900; }
+    @keyframes pulseRed { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.1); } 100% { opacity: 1; transform: scale(1); } }
+
+    /* MATCH CENTER (DETAILS PAGE) */
+    #details-page { display: none; min-height: 100vh; width: 100%; background: #f8f9fa; color: #333; padding-bottom: 40px; position: absolute; top:0; z-index: 200; }
+    body.view-match #main-app { display: none !important; }
+    body.view-match #details-page { display: block !important; }
+    .dp-header-atv { background: #ffffff; padding: 12px 15px; position: sticky; top: 0; z-index: 210; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; }
+    .dp-title-center { font-weight: 800; font-size: 16px; text-transform: uppercase; color: #000; letter-spacing: 0.5px; }
+    
+    /* MATCH CENTER CARD UI UPDATE - THIN BORDER */
+    .dp-card-shining { 
+      background: #ffffff; padding: 20px 15px; margin: 20px 18px; border-radius: 12px; 
+      text-align: center; position: relative; border: 1px solid transparent;
+      background-image: linear-gradient(white, white), linear-gradient(90deg, #ff0000, #1877F2, #39ff14, #ff0000);
+      background-origin: border-box; background-clip: content-box, border-box;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1); animation: shineBorder 3s infinite linear;
+      display: flex; flex-direction: column; align-items: center; 
+    }
+    @keyframes shineBorder { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
+    .dp-league-logo-top { width: 45px; height: 45px; object-fit: contain; margin-bottom: 15px; }
+    .dp-logo-atv { width: 65px; height: 65px; object-fit: contain; }
+    .dp-vs-atv { font-size: 24px; font-weight: 900; color: #e0e0e0; }
+    
+    /* MATCH CENTER BOLD NAME - HARD FIXED */
+    .dp-bold-name { color: #000; font-size: 15px; font-weight: 800 !important; text-transform: uppercase; margin-top: 15px; line-height: 1.4; padding: 0 10px; }
+
+    /* SERVER BUTTONS (NAVY BLUE) */
+    .atv-section-label { margin: 25px 15px 10px 15px; font-size: 13px; font-weight: 800; color: #222; border-left: 4px solid #000; padding-left: 10px; text-transform: uppercase; }
+    .atv-server-card { 
+        display: flex; align-items: center; justify-content: space-between; 
+        background: #000080; color: #fff; margin: 0 15px 12px 15px; padding: 10px 15px; 
+        border-radius: 10px; cursor: pointer; border: 1.5px solid rgba(255,255,255,0.1); 
+    }
+    .atv-srv-left { display: flex; align-items: center; gap: 12px; flex: 1; overflow: hidden; }
+    .atv-srv-logo { width: 45px !important; height: 45px !important; border-radius: 8px; object-fit: cover; background: #000; flex-shrink: 0; }
+    .atv-srv-txt { display: flex; flex-direction: column; overflow: hidden; }
+    .atv-srv-name { font-size: 14px; font-weight: 800; color: #fff; text-transform: uppercase; white-space: nowrap; }
+    .atv-srv-hq { font-size: 10px; color: #ddd; font-weight: 600; margin-top: 2px; text-transform: uppercase; }
+    .atv-srv-watch { background: #2ecc71; color: #fff; padding: 7px 14px; border-radius: 6px; font-size: 11px; font-weight: 900; text-transform: uppercase; white-space: nowrap; flex-shrink: 0; }
+
+    /* LEGAL NOTICE */
+    .atv-legal-notice-box { margin: 25px 15px; background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #eee; box-shadow: 0 2px 12px rgba(0,0,0,0.05); }
+    .atv-legal-title { color: #d32f2f; font-size: 14px; font-weight: 900; text-transform: uppercase; margin-bottom: 15px; border-bottom: 1.5px solid #eee; padding-bottom: 10px; }
+    .atv-legal-p { margin-bottom: 15px; font-size: 12.5px; color: #444; line-height: 1.6; text-align: justify; }
+    .atv-legal-p strong { color: #000; font-weight: 800; }
+
+    /* PLAYER MODAL (UPDATED REORDER & SCROLL FIX) */
+    #player-modal { 
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; 
+        z-index: 3000; display: none; flex-direction: column; overflow-y: auto; color: #fff; 
+        overscroll-behavior: contain;
+    }
+    #player-modal.active { display: flex; }
+    .pm-atv-close { position: absolute; top: 20px; right: 20px; color: white; font-size: 32px; z-index: 3010; cursor: pointer; background: rgba(0,0,0,0.5); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
+    
+    .pm-top-info { text-align: center; padding: 15px 0; background: #000; border-bottom: 1px solid #1a1a1a; }
+    
+    .atv-player-social-top { padding: 0 15px; display: flex; flex-direction: column; gap: 10px; margin: 15px 0; }
+    .atv-social-pill { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; padding: 12px; border-radius: 50px; font-weight: 900; font-size: 14px; color: #fff; text-transform: uppercase; }
+    .btn-tg-join { background: #0088cc; }
+    .btn-fb-join { background: #1877F2; }
+
+    .fake-live-wrap { margin-bottom: 10px; }
+    .fake-counter-pill { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 50px; font-size: 12px; font-weight: 800; }
+    .fake-dot-blink { width: 8px; height: 8px; background: #ff4d4d; border-radius: 50%; animation: blinkCounter 1s infinite; }
+    @keyframes blinkCounter { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+    
+    #atv-video-iframe-area { width: 100%; aspect-ratio: 16/9; background: #000; border-top: 1px solid #222; border-bottom: 1px solid #222; }
+    #atv-video-iframe-area iframe { width: 100%; height: 100%; border: none; }
+
+    .atv-audio-instruction { margin: 15px; background: #111; border: 1px solid #222; padding: 14px; border-radius: 8px; color: #ddd; font-size: 12px; text-align: center; font-weight: 600; line-height: 1.4; }
+
+    /* PLAYER PAGE FOOTER (PROFESSIONAL) */
+    .atv-player-footer-final { background: #080808; padding: 40px 25px; border-top: 1px solid #1a1a1a; text-align: left; }
+    .apf-h { color: #fff; font-size: 15px; font-weight: 900; text-transform: uppercase; margin-bottom: 15px; border-bottom: 2.5px solid #d32f2f; display: inline-block; padding-bottom: 5px; }
+    .apf-p { font-size: 12.5px; line-height: 1.7; margin-bottom: 30px; color: #999; text-align: justify; }
+    .apf-ul { list-style: none; margin-bottom: 35px; }
+    .apf-ul li { padding: 10px 0; border-bottom: 1px solid #1a1a1a; font-size: 14px; color: #ccc; cursor: pointer; }
+    .apf-newsletter-wrap { margin-top: 15px; }
+    .news-row { display: flex; margin-top: 12px; }
+    .news-in-field { background: #1a1a1a; border: 1px solid #333; padding: 14px; color: #fff; flex: 1; border-radius: 6px 0 0 6px; font-size: 14px; }
+    .news-bt-send { background: #d32f2f; border: none; padding: 0 20px; border-radius: 0 6px 6px 0; color: #fff; font-size: 18px; cursor: pointer; }
+    .apf-copy-line { text-align: center; border-top: 1px solid #1a1a1a; padding-top: 30px; font-size: 12.5px; color: #555; font-weight: 600; }
+
+    .main-footer-atv { background: #000; color: #fff; padding: 50px 20px; text-align: center; border-top: 1px solid #222; margin-top: 20px; }
+    .mf-menu-links { display: flex; justify-content: center; flex-wrap: wrap; gap: 25px; margin-top: 20px; }
+    .mf-menu-links span { color: #ccc; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+
+    .back-to-top { position: fixed; bottom: 85px; right: 20px; width: 45px; height: 45px; background: #ff0040; border-radius: 50%; display: none; align-items: center; justify-content: center; color: #fff; z-index: 9999; cursor: pointer; }
+    #req-popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+  </style>
 </head>
-<body>
-    <div class="video-container" id="video-container" onclick="toggleControls()">
-        <video id="video" autoplay playsinline></video>
-        <div id="error-msg">Loading...</div>
-        <div class="spinner" id="buffering-spinner"></div>
 
-        <div class="center-overlay" id="center-controls">
-            <button class="center-btn" onclick="event.stopPropagation(); skip(-10)"><span class="material-icons medium">replay_10</span></button>
-            <button class="center-btn" onclick="event.stopPropagation(); togglePlay()"><span class="material-icons large" id="center-play-icon">pause</span></button>
-            <button class="center-btn" onclick="event.stopPropagation(); skip(10)"><span class="material-icons medium">forward_10</span></button>
+<body>
+
+  <div class='back-to-top' id='btn-back-to-top' onclick='scrollToTop()'><i class='fa-solid fa-chevron-up'></i></div>
+
+  <!-- FIXED BOTTOM NAV (HOME PAGE) -->
+  <div class="fixed-bottom-nav">
+      <div class="bn-item" onclick="location.reload()"><i class="fa-solid fa-calendar-day"></i> LIVE EVENTS</div>
+      <div class="bn-item" onclick="openInfo('contact')"><i class="fa-solid fa-tv"></i> SPORTS CHANNEL</div>
+  </div>
+
+  <!-- REQUEST POPUP -->
+  <div id='req-popup-overlay'>
+     <div style="background:#1a1e23; width:90%; max-width:350px; border-radius:16px; padding:25px; text-align:center; border:1px solid #333;">
+        <div style="color:#f1c40f; font-size:22px; font-weight:900; margin-bottom:10px;">Request a Match!</div>
+        <div style="color:#ccc; font-size:14px; margin-bottom:25px;">Missing a game? Join our Telegram Group and request.</div>
+        <a href='https://t.me/Atvsports' style="background:#f1c40f; color:#000; padding:12px; border-radius:8px; font-weight:800; display:block; text-decoration:none;">Join Now</a>
+        <div style="display:flex; justify-content:space-between; margin-top:15px; font-size:12px; color:#aaa;">
+           <div style="cursor:pointer;" onclick='dontShowToday()'>Don't show today</div>
+           <div style="cursor:pointer;" onclick='closePopup()'>Close</div>
+        </div>
+     </div>
+  </div>
+
+  <!-- INFO MODAL -->
+  <div id="info-modal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:5000; display:none; justify-content:center; align-items:flex-end;">
+      <div style="background:#1a1a1a; width:100%; max-width:600px; height:85%; border-radius:20px 20px 0 0; display:flex; flex-direction:column; border-top:1px solid #333;">
+          <div style="padding:20px; border-bottom:1px solid #333; display:flex; justify-content:space-between; align-items:center;">
+              <div style="font-weight:800; color:#fff; text-transform:uppercase;" id="im-title-text">Title</div>
+              <div style="color:#ff4757; cursor:pointer; font-size:24px;" onclick="closeInfoModal()"><i class="fa-solid fa-times"></i></div>
+          </div>
+          <div style="padding:25px; overflow-y:auto; color:#ccc; font-size:14px; line-height:1.7;" id="im-body-content"></div>
+      </div>
+  </div>
+
+  <!-- SIDEBAR (SCREENSHOT DESIGN) -->
+  <div class='sidebar-overlay' id='overlay' onclick='toggleSidebar()'></div>
+  <div class='sidebar-panel' id='SIDEBAR_MENU_AREA'>
+    <div class="sb-atv-header">
+        <div class="sb-atv-title">ATV Sports</div>
+        <div class="sb-atv-desc">ATV Sports is one of the best website in the world for Entertainment and Sports</div>
+        <div class="sb-red-line"></div>
+    </div>
+    <ul class="sb-atv-list">
+       <li><a href="https://atvsports.xyz"><i class="fa-solid fa-globe"></i> Official Website</a></li>
+       <li><a href="https://t.me/Atvsports"><i class="fa-brands fa-telegram"></i> Telegram Channel</a></li>
+       <li><a href="https://facebook.com/groups/1000852144439938/"><i class="fa-brands fa-facebook"></i> Facebook Group</a></li>
+       <li><a href="https://www.facebook.com/atvsportss"><i class="fa-brands fa-facebook"></i> Facebook Page</a></li>
+       <li><a href="mailto:Contactatvsports@gmail.com"><i class="fa-solid fa-envelope"></i> Contact Us (Email)</a></li>
+       <li style="border-top:1px solid #333; margin-top: 10px;"><a onclick="openInfo('dmca')"><i class="fa-solid fa-copyright"></i> Legal & Copyright</a></li>
+    </ul>
+  </div>
+
+  <!-- PLAYER MODAL (FULLY FIXED) -->
+  <div id='player-modal'>
+    <div class='pm-atv-close' onclick='closePlayer(false)'><i class='fa-solid fa-times'></i></div>
+    
+    <div class="pm-top-info">
+        <!-- SITE LOGO (SAME AS HOME) -->
+        <div class="logo-main" style="justify-content: center; transform: scale(0.85); margin-bottom: 5px;">
+            <span class="atv-a">A</span><span class="atv-t">T</span><span class="atv-v">V</span> <span class="logo-sports">SPORTS</span>
         </div>
 
-        <div class="popup-overlay" id="popup-overlay" onclick="closeAllMenus()"></div>
-        <div class="popup-menu" id="quality-menu"></div>
-        <div class="popup-menu" id="audio-menu"></div>
+        <!-- TELEGRAM & FACEBOOK BUTTONS (TOP) -->
+        <div class="atv-player-social-top">
+            <a href="https://t.me/Atvsports" class="atv-social-pill btn-tg-join"><i class="fa-brands fa-telegram"></i> Join Telegram Channel</a>
+            <a href="https://www.facebook.com/atvsportss" class="atv-social-pill btn-fb-join"><i class="fa-brands fa-facebook"></i> Join Facebook Page</a>
+        </div>
 
-        <div class="custom-controls" id="controls" onclick="event.stopPropagation()">
-            <div class="seek-bar-container" onclick="seekVideo(event)"><div class="seek-fill" id="seek-fill"></div></div>
-            <div class="buttons-row">
-                <div class="left-buttons">
-                    <button class="icon-btn" onclick="togglePlay()"><span class="material-icons" id="play-icon">pause</span></button>
-                    <button class="icon-btn" onclick="toggleMute()"><span class="material-icons" id="vol-icon">volume_up</span></button>
-                    <span class="time-text" id="time-display" onclick="goLive()">0:00</span>
-                </div>
-                <div class="right-buttons">
-                    <button class="icon-btn" onclick="openMenu('quality-menu')"><span class="material-icons">settings</span></button>
-                    <button class="icon-btn" onclick="openMenu('audio-menu')"><span class="material-icons">language</span></button>
-                    <button class="icon-btn" onclick="togglePiP()"><span class="material-icons">picture_in_picture_alt</span></button>
-                    <button class="icon-btn" onclick="toggleFull()"><span class="material-icons">fullscreen</span></button>
-                </div>
-            </div>
+        <!-- LIVE COUNTER -->
+        <div class="fake-live-wrap">
+            <div class="fake-counter-pill"><div class="fake-dot-blink"></div> <span id="fake-watching-atv">2,458</span> WATCHING LIVE</div>
         </div>
     </div>
 
-    <script>
-        let player;
-        const video = document.getElementById('video');
-        const spinner = document.getElementById('buffering-spinner');
-        const errorMsg = document.getElementById('error-msg');
-        let hideTimeout;
+    <!-- VIDEO PLAYER AREA -->
+    <div id='atv-video-iframe-area'></div>
 
-        async function init() {
-            shaka.polyfill.installAll();
-            if (shaka.Player.isBrowserSupported()) {
-                player = new shaka.Player(video);
-                player.addEventListener('error', (e) => console.error(e));
-                player.addEventListener('buffering', (e) => spinner.style.display = e.buffering ? 'block' : 'none');
-                
-                const params = new URLSearchParams(window.location.search);
-                const channelId = params.get('play');
+    <div class="atv-audio-instruction">
+        If the audio is not playing, please click the volume icon 🔊 on the video player.
+    </div>
 
-                if (channelId) {
-                    try {
-                        const response = await fetch("https://raw.githubusercontent.com/sptvhelpdesk-ship-it/jstar-aoi/refs/heads/main/channels.json");
-                        const channelList = await response.json();
-                        const channel = channelList.find(c => c.channel_id == channelId);
+    <div class="atv-player-footer-final">
+        <div class="apf-col">
+            <div class="apf-h">About Us</div>
+            <div class="apf-p">Your ultimate destination for live sports coverage. Get the latest scores, schedules, and streams for Football, Cricket, and major leagues worldwide. Our platform is optimized for seamless performance across all devices.</div>
+        </div>
+        <div class="apf-col">
+            <div class="apf-h">Learn More</div>
+            <ul class="apf-ul">
+                <li onclick="openInfo('about')">About ATV SPORTS</li>
+                <li onclick="openInfo('disclaimer')">Disclaimer Policy</li>
+                <li onclick="openInfo('privacy')">Privacy Policy</li>
+                <li onclick="openInfo('contact')">Contact Support</li>
+            </ul>
+        </div>
+        <div class="apf-col">
+            <div class="apf-h">Newsletter</div>
+            <div class="apf-p">Stay up to date with the latest match schedules and relevant sporting updates from our team.</div>
+            <div class="news-row">
+                <input type="email" placeholder="Email Address" class="news-in-field">
+                <button class="news-bt-send"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+        <div class="apf-copy-line">Copyright © 2026 ATV SPORTS. Managed by ATV SPORTS</div>
+    </div>
+  </div>
 
-                        if (channel) {
-                            document.title = channel.name || "Live TV";
+  <!-- DETAILS PAGE (MATCH CENTER) -->
+  <div id='details-page'>
+     <div class='dp-header-atv'>
+        <i class='fa-solid fa-arrow-left' style="font-size:20px; cursor:pointer;" onclick='goHome()'></i>
+        <span class='dp-title-center'>Match Center</span>
+        <div style="width:20px;"></div>
+     </div>
+     <div id='details-content'></div>
+  </div>
 
-                            // ================= FIX LOGIC START =================
-                            player.getNetworkingEngine().registerRequestFilter((type, request) => {
-                                // ১. Headers Setup
-                                request.headers['User-Agent'] = channel.userAgent || 'plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.';
-                                request.headers['Referer'] = channel.referer || 'https://www.jiotv.com/';
+  <!-- MAIN APP (HOME PAGE) -->
+  <div class='main-wrapper' id='main-app'>
+    <div class='header-container'>
+      <div class='icon-box' onclick='toggleSidebar()'><i class='fa-solid fa-bars'></i></div>
+      <div class='logo-main'><span class="atv-a">A</span><span class="atv-t">T</span><span class="atv-v">V</span> <span class="logo-sports">SPORTS</span></div>
+      <div class='icon-box' onclick='toggleTheme()'><i class='fa-solid fa-moon' id='theme-icon'></i></div>
+    </div>
 
-                                // ২. Token Logic (V1 এর মতো ফিক্স করা হয়েছে)
-                                if (channel.token && (type === shaka.net.NetworkingEngine.RequestType.MANIFEST || type === shaka.net.NetworkingEngine.RequestType.SEGMENT)) {
-                                    const separator = request.uris[0].includes('?') ? '&' : '?';
-                                    if (!request.uris[0].includes('__hdnea__')) {
-                                        request.uris[0] += separator + channel.token;
-                                    }
-                                }
-                            });
-                            // ================= FIX LOGIC END ===================
+    <div class='content-area'>
+      <!-- PROMO BOX RESTORED -->
+      <a href="https://atvsports.xyz" class="promo-scrolling-box">
+          <marquee scrollamount="5">🚀 For better streaming and service please download our official app - Click here to install now!</marquee>
+      </a>
 
-                            const drmConfig = (channel.drm && Object.keys(channel.drm).length > 0) ? { 'clearKeys': channel.drm } : {};
+      <div class="filter-tabs">
+          <button class="f-btn active" onclick="filterMatch('all', this)">All</button>
+          <button class="f-btn" onclick="filterMatch('live', this)">Live</button>
+          <button class="f-btn" onclick="filterMatch('upcoming', this)">Upcoming</button>
+          <button class="f-btn" onclick="filterMatch('recent', this)">Recent</button>
+      </div>
 
-                            player.configure({
-                                'drm': drmConfig,
-                                'streaming': {
-                                    'lowLatencyMode': true,
-                                    'retryParameters': { 'timeout': 15000, 'maxAttempts': 3 }
-                                },
-                                'abr': { 'enabled': true }
-                            });
+      <div id="match-list-container"></div>
+    </div>
 
-                            try {
-                                await player.load(channel.mpd);
-                                var playPromise = video.play();
-                                if (playPromise !== undefined) {
-                                    playPromise.catch(() => {
-                                        video.muted = true;
-                                        video.play();
-                                        toggleMuteUI();
-                                    });
-                                }
+    <div class='main-footer-atv'>
+       <div style="font-size: 13.5px; font-weight: 700; letter-spacing: 0.5px;">&copy; 2026 ATV SPORTS | All Rights Reserved</div>
+       <div class='mf-menu-links'>
+          <span onclick="openInfo('about')">About</span>
+          <span onclick="openInfo('disclaimer')">Disclaimer</span>
+          <span onclick="openInfo('contact')">Contact</span>
+          <span onclick="openInfo('dmca')">DMCA Policy</span>
+       </div>
+    </div>
+  </div>
 
-                                if (player.isLive()) video.currentTime = player.seekRange().end - 1;
-                                startTimer();
-                                updateMenus();
-                                showControls();
+  <script>
+    const API_URL = "https://raw.githubusercontent.com/ayvspop/ATV-DATA/refs/heads/main/data.json";
+    let allMatches = [];
+    let timerUpdater = null;
+    let fakeCounterInterval = null;
 
-                            } catch (e) {
-                                showError("Stream Offline / Error");
-                            }
+    const pageContent = {
+        about: `<h3>About ATV Sports</h3><p>ATV Sports is the premier digital platform for live sports enthusiasts. We deliver high-quality streaming links and real-time updates for Football, Cricket, and more.</p>`,
+        disclaimer: `<h3>Disclaimer</h3><p>ATV Sports does not host any media files. We provide links to publicly available streams for informational purposes only. We are not responsible for the content of external sites.</p>`,
+        contact: `<h3>Contact Us</h3><p>Email: Contactatvsports@gmail.com<br>Telegram: @Atvsports</p>`,
+        dmca: `<h3>DMCA</h3><p>Please contact the host site directly for link removal from our index.</p>`,
+        privacy: `<h3>Privacy Policy</h3><p>We do not collect personal data without your consent.</p>`
+    };
 
-                        } else {
-                            showError("Channel ID Not Found");
-                        }
-                    } catch (e) {
-                        showError("Failed to fetch channel list");
-                    }
-                } else {
-                    showError("Error: Use ?play=CHANNEL_ID");
-                }
+    async function initApp() {
+      if(localStorage.getItem('atv_theme') === 'light') toggleTheme();
+      try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+        allMatches = data.sports_live.events;
+        // SORTING: LATEST ON TOP
+        allMatches.sort((a, b) => new Date(a.eventInfo.startTime) - new Date(b.eventInfo.startTime));
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if(urlParams.get('match')) {
+           const match = allMatches.find(m => `${m.eventInfo.teamA}-vs-${m.eventInfo.teamB}`.replace(/\s+/g, '-').toLowerCase() === decodeURIComponent(urlParams.get('match')));
+           if(match) { document.body.classList.add('view-match'); renderDetails(match); }
+        } else { renderMatches('all'); }
+        
+        timerUpdater = setInterval(updateAllTimers, 1000);
+      } catch(e) { console.log("API Error"); }
+    }
+
+    function renderMatches(filter) {
+      const container = document.getElementById('match-list-container');
+      container.innerHTML = "";
+      const now = new Date().getTime();
+      
+      allMatches.forEach(match => {
+         const start = new Date(match.eventInfo.startTime).getTime();
+         const end = match.eventInfo.endTime ? new Date(match.eventInfo.endTime).getTime() : (start + 7200000);
+         let status = (now >= start && now <= end) ? 'live' : (now > end ? 'recent' : 'upcoming');
+         
+         if(filter !== 'all' && filter !== status) return;
+         if(filter === 'all' && status === 'recent') return;
+
+         const dateObj = new Date(start);
+         const dateStr = dateObj.toLocaleDateString([], {day:'2-digit', month:'short'}).toUpperCase();
+         // 12H TIME AM/PM
+         const timeStr = dateObj.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', hour12: true});
+         const isLong = (match.cat + match.eventInfo.eventName).length > 25;
+
+         const div = document.createElement('div');
+         div.className = `m-card ${status}`;
+         div.dataset.start = match.eventInfo.startTime;
+         div.dataset.end = match.eventInfo.endTime || "";
+         
+         div.innerHTML = `
+            <div class="mc-header">
+               <div class="mc-header-left">
+                  <img class="mc-league-logo" src="${match.league_logo}" onerror="this.style.display='none'"/>
+                  <span class="mc-league-text ${isLong ? 'scroll-active' : ''}">${match.cat} | ${match.eventInfo.eventName}</span>
+               </div>
+               <span class="mc-timer-top">${dateStr} ${timeStr}</span>
+            </div>
+            <div class="mc-teams">
+               <div class="mc-team"><img class="mc-logo" src="${match.eventInfo.teamAFlag}"/><span class="mc-name">${match.eventInfo.teamA}</span></div>
+               <div class="mc-status-center"></div>
+               <div class="mc-team"><img class="mc-logo" src="${match.eventInfo.teamBFlag}"/><span class="mc-name">${match.eventInfo.teamB}</span></div>
+            </div>
+         `;
+         div.onclick = () => { window.location.href = "?match=" + encodeURIComponent(`${match.eventInfo.teamA}-vs-${match.eventInfo.teamB}`.replace(/\s+/g, '-').toLowerCase()); };
+         container.appendChild(div);
+      });
+      updateAllTimers();
+    }
+
+    function updateAllTimers() {
+        const now = new Date().getTime();
+        document.querySelectorAll('.m-card').forEach(card => {
+            const start = new Date(card.dataset.start).getTime();
+            const end = card.dataset.end ? new Date(card.dataset.end).getTime() : (start + 7200000);
+            const statusBox = card.querySelector('.mc-status-center');
+            
+            if (now < start) {
+                const diff = start - now;
+                statusBox.innerHTML = `<span class="vs-txt-main">VS</span><span class="st-label">Starting In</span><span class="st-time">${formatHMS(diff)}</span>`;
+            } else if (now >= start && now <= end) {
+                const elapsed = now - start;
+                card.classList.add('live');
+                statusBox.innerHTML = `<div class="live-dot-blob"></div><span class="live-txt-red">LIVE</span><span class="st-label" style="margin-top:2px;">Started In</span><span class="st-time">${formatHMS(elapsed)}</span>`;
             } else {
-                showError("Browser Not Supported");
+                card.classList.remove('live');
+                statusBox.innerHTML = `<span class="vs-txt-main">VS</span><span style="color:#ff4757; font-size:11px; font-weight:900;">FINISHED</span>`;
             }
-        }
+        });
+    }
 
-        function showError(msg) {
-            errorMsg.style.display = 'block';
-            errorMsg.innerText = msg;
-            spinner.style.display = 'none';
-        }
+    function formatHMS(ms) {
+        const h = Math.floor(ms / 3600000);
+        const m = Math.floor((ms % 3600000) / 60000);
+        const s = Math.floor((ms % 60000) / 1000);
+        return `${h > 0 ? h + ':' : ''}${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`;
+    }
 
-        function openMenu(id) { closeAllMenus(); document.getElementById('popup-overlay').style.display = 'block'; document.getElementById(id).style.display = 'flex'; }
-        function closeAllMenus() { document.getElementById('popup-overlay').style.display = 'none'; document.querySelectorAll('.popup-menu').forEach(m => m.style.display = 'none'); }
-        
-        function updateMenus() {
-            const q = document.getElementById('quality-menu');
-            q.innerHTML = `<div style="padding:12px;font-weight:bold;border-bottom:1px solid #333;display:flex;justify-content:space-between">Quality <span onclick="closeAllMenus()" style="cursor:pointer">×</span></div><div class="popup-item" onclick="setQ('auto')">Auto <span class="kbps">Rec.</span></div>`;
-            const tracks = player.getVariantTracks();
-            const seen = new Set();
-            tracks.sort((a,b) => b.height - a.height).forEach(t => {
-                if(t.height && !seen.has(t.height)) {
-                    seen.add(t.height);
-                    q.innerHTML += `<div class="popup-item" onclick="setQ(${t.height})">${t.height}p <span class="kbps">${Math.round(t.bandwidth/1000)} kbps</span></div>`;
-                }
-            });
+    // MATCH CENTER LOGIC (UI UPDATED: DYNAMIC NAMES & LEAGUE LOGO)
+    function renderDetails(match) {
+       const container = document.getElementById('details-content');
+       const start = new Date(match.eventInfo.startTime);
+       const timeStr = `${start.toLocaleDateString([], {day:'numeric', month:'short', year:'numeric'})} | ${start.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', hour12:true})}`;
 
-            const a = document.getElementById('audio-menu');
-            a.innerHTML = `<div style="padding:12px;font-weight:bold;border-bottom:1px solid #333;display:flex;justify-content:space-between">Audio <span onclick="closeAllMenus()" style="cursor:pointer">×</span></div>`;
-            const langName = new Intl.DisplayNames(['en'], { type: 'language' });
-            player.getAudioLanguages().forEach(l => {
-                let label;
-                try { label = langName.of(l); } catch(e) { label = l.toUpperCase(); }
-                a.innerHTML += `<div class="popup-item" onclick="setA('${l}')">${label}</div>`;
-            });
-        }
+       let linksHtml = '<div class="atv-section-label">Stream Links</div>';
+       match.channels_data.forEach((ch, idx) => {
+          const sName = ch.title || 'Server '+(idx+1);
+          // HD STREAMING -> Dynamic Team Names
+          const hqText = `${match.eventInfo.teamA} VS ${match.eventInfo.teamB}`;
+          linksHtml += `
+             <div class="atv-server-card" onclick="playIframe('${btoa(ch.link)}')">
+                <div class="atv-srv-left">
+                   <img src="https://i.ibb.co/5WGn2kfJ/1000388011.jpg" class="atv-srv-logo">
+                   <div class="atv-srv-txt">
+                      <span class="atv-srv-name">${sName}</span>
+                      <span class="atv-srv-hq">${hqText}</span>
+                   </div>
+                </div>
+                <div class="atv-srv-watch"><i class="fa-solid fa-play"></i> Watch Now</div>
+             </div>`;
+       });
 
-        function setQ(h) { h==='auto'?player.configure({abr:{enabled:true}}):(player.configure({abr:{enabled:false}}),player.selectVariantTrack(player.getVariantTracks().find(x=>x.height==h),true)); closeAllMenus(); }
-        function setA(l) { player.selectAudioLanguage(l); closeAllMenus(); }
+       container.innerHTML = `
+          <div style="margin:5px;">
+             <div class="dp-card-shining">
+                <!-- LEAGUE LOGO AT TOP MIDDLE -->
+                <img class="dp-league-logo-top" src="${match.league_logo}" onerror="this.style.display='none'"/>
+                
+                <div style="display:flex; justify-content:space-around; align-items:center; width:100%;">
+                   <div class="mc-team"><img class="dp-logo-atv" src="${match.eventInfo.teamAFlag}"/><div style="font-weight:700; font-size:13px; margin-top:8px; color:#000;">${match.eventInfo.teamA}</div></div>
+                   <div class="dp-vs-atv">VS</div>
+                   <div class="mc-team"><img class="dp-logo-atv" src="${match.eventInfo.teamBFlag}"/><div style="font-weight:700; font-size:13px; margin-top:8px; color:#000;">${match.eventInfo.teamB}</div></div>
+                </div>
+                <div class="dp-bold-name"><strong>${match.cat} | ${match.eventInfo.eventName}</strong></div>
+                <div style="margin-top:8px; font-size:12px; color:#fff; background:#333; display:inline-block; padding:5px 14px; border-radius:50px; font-weight:600;">${timeStr}</div>
+             </div>
+          </div>
+          ${linksHtml}
+          <div class="atv-legal-notice-box">
+              <div class="atv-legal-title">Important Legal Notice & Disclaimer</div>
+              <div class="atv-legal-p"><strong>1. Content Hosting:</strong> ATV SPORTS is an online information service provider. We absolutely DO NOT host, upload, create, store, or transmit any video content, media files, or live streams on our servers.</div>
+              <div class="atv-legal-p"><strong>2. Third-Party Links:</strong> By clicking on any link, you are leaving ATV SPORTS and accessing content from third-party entities. We have no control over the nature, content, and availability of those sites.</div>
+              <div class="atv-legal-p"><strong>3. Intellectual Property Rights:</strong> All trademarks, logos, team names, and brand identifiers appearing on this site are the property of their respective owners.</div>
+              <div class="atv-legal-p"><strong>4. DMCA Compliance:</strong> We respect the Digital Millennium Copyright Act (DMCA). Since we do not host content, valid takedown notices should be directed to the host site actually hosting the file.</div>
+              <div class="atv-legal-p"><strong>5. User Responsibility:</strong> Users are responsible for ensuring that their use of these streams complies with their local laws and regulations.</div>
+          </div>`;
+    }
 
-        function startTimer() {
-            video.ontimeupdate = () => {
-                if(player.isLive()) {
-                    const lat = player.seekRange().end - video.currentTime;
-                    lat < 10 ? (document.getElementById('time-display').innerHTML = '<span style="color:#e50914">●</span> LIVE', document.getElementById('seek-fill').style.width = '100%') 
-                            : (document.getElementById('time-display').innerText = "-" + formatTime(lat), document.getElementById('time-display').style.color = "#ccc", document.getElementById('seek-fill').style.width = (((video.currentTime - player.seekRange().start)/(player.seekRange().end - player.seekRange().start))*100) + '%');
-                } else {
-                    document.getElementById('seek-fill').style.width = ((video.currentTime/video.duration)*100) + '%';
-                    document.getElementById('time-display').innerText = formatTime(video.currentTime) + " / " + formatTime(video.duration);
-                }
-            };
-        }
-        function formatTime(s) { const m = Math.floor(s / 60), sec = Math.floor(s % 60); return `${m}:${sec < 10 ? '0' : ''}${sec}`; }
-        function skip(v) { video.currentTime += v; showControls(); }
-        function goLive() { if(player.isLive()) video.currentTime = player.seekRange().end - 1; }
-        function seekVideo(e) { const r = e.currentTarget.getBoundingClientRect(), p = (e.clientX - r.left) / r.width; player.isLive() ? video.currentTime = player.seekRange().start + ((player.seekRange().end - player.seekRange().start) * p) : video.currentTime = p * video.duration; }
-        
-        function togglePlay() { video.paused ? (video.play(), updIcon('pause')) : (video.pause(), updIcon('play_arrow')); showControls(); }
-        function updIcon(i) { document.getElementById('play-icon').innerText = i; document.getElementById('center-play-icon').innerText = i; }
-        
-        function toggleMute() { video.muted = !video.muted; toggleMuteUI(); }
-        function toggleMuteUI() { document.getElementById('vol-icon').innerText = video.muted ? 'volume_off' : 'volume_up'; }
+    function playIframe(enc) {
+       document.getElementById('player-modal').classList.add('active');
+       history.pushState({ modal: true }, "", "#player");
+       document.getElementById('atv-video-iframe-area').innerHTML = atob(enc);
+       startFakeWatching();
+    }
 
-        function toggleFull() { !document.fullscreenElement ? document.getElementById('video-container').requestFullscreen() : document.exitFullscreen(); }
-        function togglePiP() { document.pictureInPictureElement ? document.exitPictureInPicture() : video.requestPictureInPicture(); }
-        
-        function toggleControls() { document.getElementById('controls').style.opacity === '1' ? hideControls() : showControls(); }
-        function showControls() { document.getElementById('controls').style.opacity = '1'; document.getElementById('center-controls').style.opacity = '1'; document.getElementById('video-container').style.cursor = 'default'; clearTimeout(hideTimeout); if(!video.paused) hideTimeout = setTimeout(hideControls, 3000); }
-        function hideControls() { if(!video.paused && document.getElementById('popup-overlay').style.display !== 'block') { document.getElementById('controls').style.opacity = '0'; document.getElementById('center-controls').style.opacity = '0'; document.getElementById('video-container').style.cursor = 'none'; } }
+    function startFakeWatching() {
+        if(fakeCounterInterval) clearInterval(fakeCounterInterval);
+        fakeCounterInterval = setInterval(() => {
+            const val = Math.floor(Math.random() * (3000 - 2000 + 1)) + 2000;
+            document.getElementById('fake-watching-atv').innerText = val.toLocaleString();
+        }, 3000);
+    }
 
-        document.addEventListener('DOMContentLoaded', init);
-    </script>
+    function closePlayer(isBack) { document.getElementById('player-modal').classList.remove('active'); document.getElementById('atv-video-iframe-area').innerHTML = ""; if(fakeCounterInterval) clearInterval(fakeCounterInterval); if(!isBack) history.back(); }
+    function goHome() { window.location.href = window.location.pathname; }
+    function toggleSidebar() { document.getElementById('SIDEBAR_MENU_AREA').classList.toggle('active'); document.getElementById('overlay').classList.toggle('active'); }
+    function toggleTheme() { document.body.classList.toggle('light-mode'); }
+    function filterMatch(t, b) { document.querySelectorAll('.f-btn').forEach(btn => btn.classList.remove('active')); b.classList.add('active'); renderMatches(t); }
+    function openInfo(type) { document.getElementById('info-modal').style.display='flex'; document.getElementById('im-title-text').innerText = type.toUpperCase(); document.getElementById('im-body-content').innerHTML = pageContent[type] || "No content."; }
+    function closeInfoModal() { document.getElementById('info-modal').style.display='none'; }
+    function scrollToTop() { window.scrollTo({top:0, behavior:'smooth'}); }
+    function closePopup() { document.getElementById('req-popup-overlay').style.display='none'; }
+    function dontShowToday() { localStorage.setItem('sptv_popup_day', 'true'); closePopup(); }
+    
+    window.addEventListener('popstate', (e) => { if(document.getElementById('player-modal').classList.contains('active')) closePlayer(true); });
+    window.onload = initApp;
+  </script>
 </body>
 </html>
